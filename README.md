@@ -6,6 +6,8 @@
 
 下面是目录，直接搜索可以找到对应的具体位置 
 
+`tree /f`
+
 
 ```
 │  README.md
@@ -75,8 +77,6 @@
         0x31.inndy_rop(EXP2).py
         0x31.inndy_rop(EXP3).py
         0x31.inndy_rop(EXP4).py
-<<<<<<< HEAD
+        0x35.others_babystack.py
+        0x36.pwnable_start.py
 ```
-=======
-```
->>>>>>> 9b43dd855b31c4a39aa9d1a61534d907ba215f20
